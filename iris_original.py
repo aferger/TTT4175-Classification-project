@@ -43,35 +43,72 @@ t_virginica = [0, 0, 1]
 #creates a random matrix with the same shape as W
 def xavier_init(fan_in, fan_out):
     limit = np.sqrt(1 / fan_in)  # Xavier-uniform range
-    return np.random.uniform(-limit, limit, (fan_out, fan_in))
+    return np.random.uniform(-limit, limit, (fan_in, fan_out))
 
 # W = C x D = 3klasser x 4målinger = weight
-W = xavier_init(num_features, num_classes)
+W = xavier_init(num_classes, num_features)
 print("W init: ", W)
 
 def sigmoid_matrix(W, x):
     z_k = W.dot(x)
     return 1/(1+np.exp(-z_k))
 
-def gradMSE(W, t, x):
-    # no need for the for loop, since W.dot(x) takes in all classes at once
-    g_k = sigmoid_matrix(W, x)
-    gradient = (g_k - t) * g_k * (1 - g_k)
-    #print("Gradient:", gradient)  
-    return np.outer(gradient, x)
+def sigmoid_vector(w, x):
+    z_k = np.dot(w,x)
+    #print("Vector sigmoid: ", z_k)
+    return 1/(1+np.exp(-z_k))
 
-iterations = 1000 # too many iterations will cause overfitting
+# Confusion Matrix
+w1 = W[0]
+w2 = W[1]
+w3 = W[2]
 
-for m in range(iterations):
-    alpha = 0.01 / np.sqrt(m + 1)
-    grad_W = np.zeros_like(W) # start at 0
-    for i, flower in enumerate(setosa_train + versicolor_train + virginica_train):
-        true_class = [t_setosa, t_versicolor, t_virginica][i // N_train]
-        grad_W += gradMSE(W, true_class, flower)
-    
-    W = W - alpha * grad_W
+confusion_matrix = [[0,0,0],
+                    [0,0,0],
+                    [0,0,0]]
 
-print("W trained: ", W)
+print(len(test_samples))
+
+for flower in test_samples[:20]:
+    g = [sigmoid_vector(w1, flower), sigmoid_vector(w2, flower), sigmoid_vector(w3, flower)]
+    #print("g: ", g)
+    gj = np.max(g)
+    #print("gj: ", gj)
+
+    if gj == g[0]:
+        confusion_matrix[0][0] += 1
+    if gj == g[1]:
+        confusion_matrix[0][1] += 1
+    if gj == g[2]:
+        confusion_matrix[0][2] += 1
+
+for flower in test_samples[20:40]:
+    g = [sigmoid_vector(w1, flower), sigmoid_vector(w2, flower), sigmoid_vector(w3, flower)]
+    #print("g: ", g)
+    gj = np.max(g)
+    #print("gj: ", gj)
+
+    if gj == g[0]:
+        confusion_matrix[1][0] += 1
+    if gj == g[1]:
+        confusion_matrix[1][1] += 1
+    if gj == g[2]:
+        confusion_matrix[1][2] += 1
+
+for flower in test_samples[40:]:
+    g = [sigmoid_vector(w1, flower), sigmoid_vector(w2, flower), sigmoid_vector(w3, flower)]
+    #print("g: ", g)
+    gj = np.max(g)
+    #print("gj: ", gj)
+
+    if gj == g[0]:
+        confusion_matrix[2][0] += 1
+    if gj == g[1]:
+        confusion_matrix[2][1] += 1
+    if gj == g[2]:
+        confusion_matrix[2][2] += 1
+
+print(confusion_matrix)
 
 # ---------------------------------------------------------------------
 
