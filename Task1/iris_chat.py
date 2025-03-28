@@ -11,6 +11,7 @@ y = iris.target  # 3 klasser
 # Del opp trenings- og testsett (de første 30 til trening, siste 20 til test)
 X_train = np.vstack([X[:30], X[50:80], X[100:130]])
 print("X_train: ", X_train)
+print("Len: ", len(X_train))
 y_train = np.hstack([y[:30], y[50:80], y[100:130]])
 
 X_test = np.vstack([X[30:50], X[80:100], X[130:150]])
