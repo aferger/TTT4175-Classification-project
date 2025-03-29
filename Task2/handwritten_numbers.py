@@ -5,6 +5,7 @@ import numpy as np # linear algebra
 import struct
 from array import array
 from os.path  import join
+import time
 
 #
 # MNIST Data Loader Class
@@ -56,7 +57,7 @@ import matplotlib.pyplot as plt
 #
 # Set file paths based on added MNIST Datasets
 #
-input_path = 'database_handwritten_num'
+input_path = 'Task2/database_handwritten_num'
 training_images_filepath = join(input_path, 'train-images.idx3-ubyte')
 training_labels_filepath = join(input_path, 'train-labels.idx1-ubyte')
 test_images_filepath = join(input_path, 't10k-images.idx3-ubyte')
@@ -213,7 +214,7 @@ def nearest_neighbour(x, mu):
     return best_class
 
 # Confusion matrix
-def find_confusion_matrix(n_classes, x_test, y_test):
+def find_confusion_matrix(n_classes, x_test, y_test, mu):
 
     confusion_matrix = np.zeros((n_classes, n_classes), dtype=int)
 
@@ -233,21 +234,23 @@ def find_confusion_matrix(n_classes, x_test, y_test):
     
     return confusion_matrix, misclassified_images, correct_classified_images
         
-
-confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix(n_classes, x_test, y_test)
+start1 = time.time()
+confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix(n_classes, x_test, y_test, mu)
 # print("Confusion Matrix:")
 # print(confusion_matrix)
 
 
 # Error rate
-total_predictions = np.sum(confusion_matrix)
-correct_predictions = np.trace(confusion_matrix) # (sum of diagonal elements)
-incorrect_predictions = total_predictions - correct_predictions
+def find_error_rate(confusion_matrix):
+    total_predictions = np.sum(confusion_matrix)
+    correct_predictions = np.trace(confusion_matrix) # (sum of diagonal elements)
+    incorrect_predictions = total_predictions - correct_predictions
 
-error_rate = incorrect_predictions / total_predictions
-print(f"Error Rate: {error_rate:.4f} ({error_rate * 100:.2f}%)")
+    error_rate = incorrect_predictions / total_predictions
+    print(f"Error Rate: {error_rate:.4f} ({error_rate * 100:.2f}%)")
+    return error_rate
 
-
+end1 = time.time()
 
 # Plot of some misclassified numbers --------------------------------------------------------
 
@@ -324,6 +327,7 @@ M = 64  #number of clusters
 n_train = 6000
 train_v = feature_vector
 
+
 def class_template_clusters(n_clusters, train_v):
     C = []
     for i in range(len(train_v)):
@@ -334,10 +338,111 @@ def class_template_clusters(n_clusters, train_v):
     return C
 
 C = class_template_clusters(M,train_v) #Len 10 x 64
-print(len(C[0]))
+all_templates = np.vstack(C)  # Shape: (640, 784)
+template_labels = np.array([i for i in range(10) for _ in range(64)])  # Shape: (640,)
+
 
 # Confusion matrix
-confusion_matrix_ find_confusion_matrix(n_classes, )
+
+def NN_label(image, templates, template_labels):
+    image_flat = np.array(image).flatten()
+
+    #Euclidean distance:
+    distances = np.linalg.norm(templates-image_flat, axis=1)
     
+    nearest_idx = np.argmin(distances)
+    return template_labels[nearest_idx]
+
+
+def confusion_matrix_64_template(all_templates, template_labels, y_test):
+    from sklearn.metrics import confusion_matrix
+    y_pred = []
+    for img in x_test:
+        pred_label = NN_label(img, all_templates, template_labels)
+        y_pred.append(pred_label)
+    y_pred = np.array(y_pred)
+
+    confusion_matrix = confusion_matrix(y_test, y_pred)
+    return confusion_matrix
+
+start2 = time.time()
+
+confusion_matrix2 = confusion_matrix_64_template(all_templates, template_labels, y_test)
+# print("Confusion matrix using NN classifier with 64 templates per class: ")
+# print(confusion_matrix2)
+    
+# Error rate
+# error_rate2 = find_error_rate(confusion_matrix2)
+# print(error_rate2)
+
+# end2 = time.time()
+# print(f"Time for processing 1: {end1-start1}\nTime for processing 2: {end2-start2}")
+
+
+
+
+
+
+# KNN classifier with K = 7
+K = 7
+
+def NN_labels(image, templates, template_labels):
+    image_flat = np.array(image).flatten()
+
+    #Euclidean distance:
+    distances = np.linalg.norm(templates-image_flat, axis=1)
+    
+    label_dist = {}
+    temp_distances = []
+    temp_labels = []
+    for i in range(0, 7):
+        idx = np.argmin(distances)
+        label_dist[template_labels[idx]] = distances[idx]
+        distances = np.delete(distances, idx)
+    
+    return label_dist
+
+
+def confusion_matrix_7NN(all_templates, template_labels, y_test):
+    from sklearn.metrics import confusion_matrix
+    y_pred = []
+    for img in x_test:
+        label_dist_dict = NN_labels(img, all_templates, template_labels)
+        
+        # Checking the number of each labels
+        pred_labels = list(label_dist_dict.keys())
+        num_labels = {}
+        for label in pred_labels:
+            if label in num_labels:
+               num_labels[label] += 1
+            else:
+               num_labels[label] = 1
+
+        highest_num = 0
+        min_dist = 10**20
+        for label, num in num_labels.items():
+            if num > highest_num:
+                highest_num = num
+                pred_label = label
+                min_dist = label_dist_dict[label]
+            elif num == highest_num:
+                dist = label_dist_dict[label]
+                if dist < min_dist:
+                    pred_label = label
+
+        y_pred.append(pred_label)
+    y_pred = np.array(y_pred)
+
+    confusion_matrix = confusion_matrix(y_test, y_pred)
+    return confusion_matrix
+    
+
+print("last confusion matrix")
+confusion_matrix3 = confusion_matrix_7NN(all_templates, template_labels, y_test)
+print(confusion_matrix3)
+
+# Error rate
+error_rate3 = find_error_rate(confusion_matrix3)
+print(error_rate3)
 
 
