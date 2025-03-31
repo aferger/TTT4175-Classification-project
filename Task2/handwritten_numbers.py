@@ -101,7 +101,7 @@ for i in range(0, 5):
     images_2_show.append(x_test[r])        
     titles_2_show.append('test image [' + str(r) + '] = ' + str(y_test[r]))    
 
-#show_images(images_2_show, titles_2_show)
+
 
 
 
@@ -384,7 +384,6 @@ confusion_matrix2 = confusion_matrix_64_template(all_templates, template_labels,
 
 
 # KNN classifier with K = 7
-K = 7
 
 def NN_labels(image, templates, template_labels):
     image_flat = np.array(image).flatten()
@@ -392,12 +391,11 @@ def NN_labels(image, templates, template_labels):
     #Euclidean distance:
     distances = np.linalg.norm(templates-image_flat, axis=1)
     
-    label_dist = {}
-    temp_distances = []
-    temp_labels = []
+    # Finding K=7 closest distances:
+    label_dist = []
     for i in range(0, 7):
         idx = np.argmin(distances)
-        label_dist[template_labels[idx]] = distances[idx]
+        label_dist.append([template_labels[idx], distances[idx]])
         distances = np.delete(distances, idx)
     
     return label_dist
@@ -407,28 +405,31 @@ def confusion_matrix_7NN(all_templates, template_labels, y_test):
     from sklearn.metrics import confusion_matrix
     y_pred = []
     for img in x_test:
-        label_dist_dict = NN_labels(img, all_templates, template_labels)
+        label_dist = NN_labels(img, all_templates, template_labels)
         
         # Checking the number of each labels
-        pred_labels = list(label_dist_dict.keys())
+        pred_labels = [row[0] for row in label_dist]
+        dists = [row[1] for row in label_dist]
         num_labels = {}
         for label in pred_labels:
-            if label in num_labels:
+            if label in num_labels.keys():
                num_labels[label] += 1
             else:
                num_labels[label] = 1
 
         highest_num = 0
         min_dist = 10**20
+        idx = 0
         for label, num in num_labels.items():
             if num > highest_num:
                 highest_num = num
                 pred_label = label
-                min_dist = label_dist_dict[label]
+                min_dist = dists[idx]
             elif num == highest_num:
-                dist = label_dist_dict[label]
+                dist = dists[idx]
                 if dist < min_dist:
                     pred_label = label
+            idx += 1
 
         y_pred.append(pred_label)
     y_pred = np.array(y_pred)
