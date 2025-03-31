@@ -52,7 +52,7 @@ def WgradMSE(g):
     # divide by m to avoid unstable learning
     m = X_train.shape[0]
     dg = softmax(g) - t_train
-    return np.dot(X_train.T, dg) / m
+    return np.dot(dg.T, X_train) / m
 
 #print("gradMSE :", WgradMSE(g))
 #print("len(gradMSE): ", len(WgradMSE(g)))
@@ -67,14 +67,14 @@ def w_ioGradMSE(g):
 #creates a random matrix with the same shape as W
 def xavier_init(fan_in, fan_out):
     limit = np.sqrt(1 / fan_in)  # Xavier-uniform range
-    return np.random.uniform(-limit, limit, (fan_out, fan_in))
+    return np.random.uniform(-limit, limit, (fan_in, fan_out))
 
 # W = C x D = 3klasser x 4målinger = weight
 W = xavier_init(num_classes, num_features)
 print("W init: ", W)
 
 # Gradient descent
-alpha = 0.1
+alpha = 0.01
 iterations = 10000
 
 w_io = np.zeros((1, num_classes))  # Init bias
@@ -82,7 +82,7 @@ w_io = np.random.randn(1, num_classes) * 0.01 #Better training with normal distr
 
 
 for iteration in range(iterations):
-    g = np.dot(W.T, X_train.T).T + w_io
+    g = np.dot(X_train, W.T) + w_io
 
     W -= alpha * WgradMSE(g)
     w_io -= alpha * w_ioGradMSE(g)
@@ -91,9 +91,9 @@ print("W trained: ", W)
 
 #----------------------------------------------------------
 # Confusion Matrix
-w1 = W[:,0]
-w2 = W[:,1]
-w3 = W[:,2]
+w1 = W[0]
+w2 = W[1]
+w3 = W[2]
 
 confusion_matrix = [[0,0,0],
                     [0,0,0],
@@ -130,3 +130,51 @@ for i in range(0, len(X_test)):
             confusion_matrix[2][2] += 1
 
 print(confusion_matrix)
+
+#------------------------------------------------------------------
+#Error rate
+wrong_setosa = 0
+wrong_versicolor = 0
+wrong_virginica = 0
+total_setosa = 0
+total_versicolor = 0
+total_virginica = 0
+for i in range(0, len(confusion_matrix)):
+    for j in range(0, len(confusion_matrix[i])):
+        if i == 0:
+            if i == j:
+                total_setosa += confusion_matrix[i][j]
+            else: 
+                wrong_setosa += confusion_matrix[i][j]
+                total_setosa += confusion_matrix[i][j]
+        elif i == 1:
+            if i == j:
+                total_versicolor += confusion_matrix[i][j] 
+            else:
+                wrong_versicolor += confusion_matrix[i][j]
+                total_versicolor += confusion_matrix[i][j]
+        elif i == 2:
+            if i == j:
+                total_virginica += confusion_matrix[i][j]
+            else:
+                wrong_virginica += confusion_matrix[i][j]
+                total_virginica += confusion_matrix[i][j]
+
+print("Wrong setosa: ", wrong_setosa)
+print("Total setosa: ", total_setosa)
+print("Wrong versicolor: ", wrong_versicolor)
+print("Total versicolor: ", total_versicolor)
+print("Wrong virginica: ", wrong_virginica)
+print("Total virginica: ", total_virginica)
+
+ERR_T = (wrong_setosa + wrong_versicolor + wrong_virginica) / (total_setosa + total_versicolor + total_virginica)
+ERR_setosa = wrong_setosa / total_setosa
+ERR_versicolor = wrong_versicolor / total_versicolor
+ERR_virginica = wrong_virginica / total_virginica
+
+print("Total error rate: ", ERR_T)
+print("Error rate setosa: ", ERR_setosa)
+print("Error rate versicolor: ", ERR_versicolor)
+print("Error rate virginica: ", ERR_virginica)
+
+#------------------------------------------------------------
