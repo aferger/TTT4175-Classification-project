@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
 import scipy.special as ss
 
+## CREATING TRAINING SET AND HISTOGRAM PLOTS ##
+
 iris = load_iris() # sepal length, sepal width, petal length, petal width
 data = iris['data']
 labels = iris['target']
@@ -14,9 +16,9 @@ setosa_train  = data[:30] # class 1 [1,0,0]
 versicolor_train = data[50:80] # class 2 [0,1,0]
 virginica_train = data[100:130] # class 3 [0,0,1]
 
-print("Setosa: \n", setosa_train)
-print("Versicolor: \n", versicolor_train)
-print("Virginica: \n", virginica_train)
+#print("Setosa train: \n", setosa_train)
+#print("Versicolor train: \n", versicolor_train)
+#print("Virginica train: \n", virginica_train)
 
 setosa_plengths = []
 setosa_pwidths = []
@@ -68,6 +70,57 @@ ax[0][1].legend()
 ax[1][0].legend()
 ax[1][1].legend()
 
-
 plt.show()
 
+# finding the feature with the most overlap
+# it is easy to see from the histogram plot that petal lengt and width have the most overlap
+# assuming all distributions to be gaussian and comparing mean and variance for each set
+
+# --petal lengths-- #
+setosa_plength_mean = np.mean(setosa_plengths)
+setosa_plength_std = np.std(setosa_plengths)
+versicolor_plength_mean = np.mean(versicolor_plengths)
+versicolor_plength_std = np.std(versicolor_plengths)
+virginica_plength_mean = np.mean(virginica_plengths)
+virginica_plength_std = np.std(virginica_plengths)
+
+print("PETAL LENGTHS: ")
+print("Mean setosa: ", setosa_plength_mean)
+print("Std setosa: ", setosa_plength_std)
+print("Mean versicolor: ", versicolor_plength_mean)
+print("Std versicolor: ", versicolor_plength_std)
+print("Mean virginca: ", virginica_plength_mean)
+print("Std viriginica: ", virginica_plength_std)
+
+setosa_pwidth_mean = np.mean(setosa_pwidths)
+setosa_pwidth_std = np.std(setosa_pwidths)
+versicolor_pwidth_mean = np.mean(versicolor_pwidths)
+versicolor_pwidth_std = np.std(versicolor_pwidths)
+virginica_pwidth_mean = np.mean(virginica_pwidths)
+virginica_pwidth_std = np.std(virginica_pwidths)
+
+print("PETAL WIDTHS: ")
+print("Mean setosa: ", setosa_pwidth_mean)
+print("Std setosa: ", setosa_pwidth_std)
+print("Mean versicolor: ", versicolor_pwidth_mean)
+print("Std versicolor: ", versicolor_pwidth_std)
+print("Mean virginca: ", virginica_pwidth_mean)
+print("Std viriginica: ", virginica_pwidth_std)
+
+# according to the normal distribution: 99.7% of all data lies within 3std
+# therefore computing the areas between [mean - 3*std, mean + 3*std] for both petal length and width
+setosa_plength_area = [setosa_plength_mean - 3*setosa_plength_std, setosa_plength_mean + 3*setosa_plength_std]
+versicolor_plength_area = [versicolor_plength_mean - 3*versicolor_plength_std, versicolor_plength_mean + 3*versicolor_plength_std]
+virginica_plength_area = [virginica_plength_mean - 3*virginica_plength_std, virginica_plength_mean + 3*virginica_plength_std]
+
+print("Setosa plength area: ", setosa_plength_area)
+print("Versicolor plength area: ", versicolor_plength_area)
+print("Virginica plength area: ", virginica_plength_area)
+
+setosa_pwidth_area = [setosa_pwidth_mean - 3*setosa_pwidth_std, setosa_pwidth_mean + 3*setosa_pwidth_std]
+versicolor_pwidth_area = [versicolor_pwidth_mean - 3*versicolor_pwidth_std, versicolor_pwidth_mean + 3*versicolor_pwidth_std]
+virginica_pwidth_area = [virginica_pwidth_mean - 3*virginica_pwidth_std, virginica_pwidth_mean + 3*virginica_pwidth_std]
+
+print("Setosa pwidth area: ", setosa_pwidth_area)
+print("Versicolor pwidth area: ", versicolor_pwidth_area)
+print("Virginica pwidth area: ", virginica_pwidth_area)
