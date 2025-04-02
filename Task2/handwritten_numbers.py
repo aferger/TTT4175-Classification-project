@@ -6,7 +6,7 @@ import struct
 from array import array
 from os.path  import join
 import time
-
+import seaborn as sns
 #
 # MNIST Data Loader Class
 #
@@ -198,12 +198,6 @@ def compute_ref1(feature_vec):
         mu.append(np.sum(feature_vec[i], axis=0)/len(feature_vec[i]))
     return mu
 
-
-feature_vector = feature_vectors(n_test, x_train, y_train)
-mu = compute_ref1(feature_vector)
-
-print(euclidean_distance(x_train[0],mu[0]))
-
 def nearest_neighbour(x, mu):
     min_diff = 10**20
     for i in range(len(mu)):
@@ -233,11 +227,6 @@ def find_confusion_matrix(n_classes, x_test, y_test, mu):
             misclassified_images.append(test_image)
     
     return confusion_matrix, misclassified_images, correct_classified_images
-        
-start1 = time.time()
-confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix(n_classes, x_test, y_test, mu)
-# print("Confusion Matrix:")
-# print(confusion_matrix)
 
 
 # Error rate
@@ -250,69 +239,65 @@ def find_error_rate(confusion_matrix):
     print(f"Error Rate: {error_rate:.4f} ({error_rate * 100:.2f}%)")
     return error_rate
 
-end1 = time.time()
+
+def plot_confusion_matrix(conf_mat, class_labels=None, title="Confusion Matrix"):
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(conf_mat, annot=True, fmt='d', cmap='Blues', 
+                xticklabels=class_labels, yticklabels=class_labels)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title(title)
+    plt.show()
+
+
+def task1a():
+    print("----------------- Task 1a ---------------------")
+    feature_vector = feature_vectors(n_test, x_train, y_train)
+    mu = compute_ref1(feature_vector)
+
+    start = time.time()
+    confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix(n_classes, x_test, y_test, mu)
+    end = time.time()
+
+    plot_confusion_matrix(confusion_matrix, class_labels=[0,1,2,3,4,5,6,7,8,9])
+    find_error_rate(confusion_matrix)
+
+    print(f"Time: {end-start} seconds")
+
 
 # Plot of some misclassified numbers --------------------------------------------------------
 
-def plot_missclassified_images(misclassified_images):
+def plot_classified_images(classified_images, title):
+    plt.title(title)
+    plt.axis('off')  # Hide the axis labels
 
     # Add the first image to the figure (top-left position)
     plt.subplot(2, 2, 1)  # 2 rows, 2 columns, first position
-    plt.imshow(misclassified_images[0])  
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 1") 
+    plt.imshow(classified_images[0])  
 
     # Add the second image to the figure (top-right position)
     plt.subplot(2, 2, 2)  # 2 rows, 2 columns, second position
-    plt.imshow(misclassified_images[1])  
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 2") 
+    plt.imshow(classified_images[1])  
 
     # Add the third image to the figure (bottom-left position)
     plt.subplot(2, 2, 3)  # 2 rows, 2 columns, third position
-    plt.imshow(misclassified_images[2]) 
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 3")  
+    plt.imshow(classified_images[2]) 
 
     # Add the fourth image to the figure (bottom-right position)
     plt.subplot(2, 2, 4)  # 2 rows, 2 columns, fourth position
-    plt.imshow(misclassified_images[3])  
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 4") 
+    plt.imshow(classified_images[3])  
 
     plt.show()
 
-# Plot correctly classified images ------------------------------
+def task1bc():
+    print("---------------- Task 1b and 1c --------------------")
+    feature_vector = feature_vectors(n_test, x_train, y_train)
+    mu = compute_ref1(feature_vector)
+    confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix(n_classes, x_test, y_test, mu)
+    plot_classified_images(misclassified_images, "Misclassified images")
+    plot_classified_images(correct_classified_images, "Correctly classified images")
 
-def plot_correct_classified_images(correct_classified_images):
-    # Add the first image to the figure (top-left position)
-    plt.subplot(2, 2, 1)  # 2 rows, 2 columns, first position
-    plt.imshow(correct_classified_images[0])  
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 1") 
 
-    # Add the second image to the figure (top-right position)
-    plt.subplot(2, 2, 2)  # 2 rows, 2 columns, second position
-    plt.imshow(correct_classified_images[1])  
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 2") 
-
-    # Add the third image to the figure (bottom-left position)
-    plt.subplot(2, 2, 3)  # 2 rows, 2 columns, third position
-    plt.imshow(correct_classified_images[2]) 
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 3")  
-
-    # Add the fourth image to the figure (bottom-right position)
-    plt.subplot(2, 2, 4)  # 2 rows, 2 columns, fourth position
-    plt.imshow(correct_classified_images[3])  
-    plt.axis('off')  # Hide the axis labels
-    plt.title("Image 4") 
-
-    plt.show()
-
-# plot_missclassified_images(misclassified_images)
-# plot_correct_classified_images(correct_classified_images)
 # -------------------------------------------------------------------------------
 
 
@@ -325,7 +310,7 @@ from sklearn.cluster import KMeans
 
 M = 64  #number of clusters
 n_train = 6000
-train_v = feature_vector
+train_v = feature_vectors(n_test, x_train, y_train)
 
 
 def class_template_clusters(n_clusters, train_v):
@@ -365,20 +350,15 @@ def confusion_matrix_64_template(all_templates, template_labels, y_test):
     confusion_matrix = confusion_matrix(y_test, y_pred)
     return confusion_matrix
 
-start2 = time.time()
-
-confusion_matrix2 = confusion_matrix_64_template(all_templates, template_labels, y_test)
-# print("Confusion matrix using NN classifier with 64 templates per class: ")
-# print(confusion_matrix2)
-    
-# Error rate
-# error_rate2 = find_error_rate(confusion_matrix2)
-# print(error_rate2)
-
-# end2 = time.time()
-# print(f"Time for processing 1: {end1-start1}\nTime for processing 2: {end2-start2}")
-
-
+def task2ab():
+    print("------------------ Task 2a and 2b -------------------")
+    start = time.time()
+    confusion_matrix = confusion_matrix_64_template(all_templates, template_labels, y_test)
+    end = time.time()
+    plot_confusion_matrix(confusion_matrix)
+    find_error_rate(confusion_matrix)
+    print(f"Time: {end-start}")
+    return
 
 
 
@@ -438,12 +418,21 @@ def confusion_matrix_7NN(all_templates, template_labels, y_test):
     return confusion_matrix
     
 
-print("last confusion matrix")
-confusion_matrix3 = confusion_matrix_7NN(all_templates, template_labels, y_test)
-print(confusion_matrix3)
+def task2c():
+    print("------------ Task 2c -------------")
+    start = time.time()
+    confusion_matrix = confusion_matrix_7NN(all_templates, template_labels, y_test)
+    end = time.time()
+    plot_confusion_matrix(confusion_matrix)
+    find_error_rate(confusion_matrix)
+    print(f"Time: {end-start}")
 
-# Error rate
-error_rate3 = find_error_rate(confusion_matrix3)
-print(error_rate3)
 
 
+# --------------- Run tasks ------------------
+# For it to be easier to observe each task, only remove '#' for one task at a time
+
+task1a() # Task 1a
+task1bc() # Task 1b and 1c
+task2ab() # Task 2a and 2b
+task2c() # Task 2c
