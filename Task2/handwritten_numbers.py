@@ -343,7 +343,7 @@ def confusion_matrix_64_template(all_templates, template_labels, y_test):
     from sklearn.metrics import confusion_matrix
     y_pred = []
     for img in x_test:
-        pred_label = NN_label(img, all_templates, template_labels)
+        pred_label = KNN_label(img, all_templates, template_labels)
         y_pred.append(pred_label)
     y_pred = np.array(y_pred)
 
@@ -365,15 +365,15 @@ def task2ab():
 
 # KNN classifier with K = 7
 
-def NN_labels(image, templates, template_labels):
+def KNN_labels(image, templates, template_labels, K=1):
     image_flat = np.array(image).flatten()
 
     #Euclidean distance:
     distances = np.linalg.norm(templates-image_flat, axis=1)
     
-    # Finding K=7 closest distances:
+    # Finding K closest distances:
     label_dist = []
-    for i in range(0, 7):
+    for i in range(0, K):
         idx = np.argmin(distances)
         label_dist.append([template_labels[idx], distances[idx]])
         distances = np.delete(distances, idx)
@@ -385,7 +385,7 @@ def confusion_matrix_7NN(all_templates, template_labels, y_test):
     from sklearn.metrics import confusion_matrix
     y_pred = []
     for img in x_test:
-        label_dist = NN_labels(img, all_templates, template_labels)
+        label_dist = KNN_labels(img, all_templates, template_labels,7)
         
         # Checking the number of each labels
         pred_labels = [row[0] for row in label_dist]

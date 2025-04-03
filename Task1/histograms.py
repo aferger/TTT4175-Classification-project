@@ -74,53 +74,27 @@ plt.show()
 
 # finding the feature with the most overlap
 # it is easy to see from the histogram plot that petal lengt and width have the most overlap
-# assuming all distributions to be gaussian and comparing mean and variance for each set
 
-# --petal lengths-- #
-setosa_plength_mean = np.mean(setosa_plengths)
-setosa_plength_std = np.std(setosa_plengths)
-versicolor_plength_mean = np.mean(versicolor_plengths)
-versicolor_plength_std = np.std(versicolor_plengths)
-virginica_plength_mean = np.mean(virginica_plengths)
-virginica_plength_std = np.std(virginica_plengths)
+# The Fisher Score
+petal_length = [setosa_plengths,versicolor_plengths, virginica_plengths]
+petal_width = [setosa_pwidths, versicolor_pwidths, virginica_pwidths]
+sepal_length = [setosa_slengths, versicolor_slengths, virginica_slengths]
+sepal_width = [setosa_swidths, versicolor_swidths, virginica_swidths]
 
-print("PETAL LENGTHS: ")
-print("Mean setosa: ", setosa_plength_mean)
-print("Std setosa: ", setosa_plength_std)
-print("Mean versicolor: ", versicolor_plength_mean)
-print("Std versicolor: ", versicolor_plength_std)
-print("Mean virginca: ", virginica_plength_mean)
-print("Std viriginica: ", virginica_plength_std)
+def fisher_score(feature):
+    n_c = 30
+    numerator = 0
+    denumerator = 0
+    for c in feature:
+        numerator += n_c * (np.mean(c)-np.mean(feature))**2
+        denumerator += n_c * np.std(c)**2
 
-setosa_pwidth_mean = np.mean(setosa_pwidths)
-setosa_pwidth_std = np.std(setosa_pwidths)
-versicolor_pwidth_mean = np.mean(versicolor_pwidths)
-versicolor_pwidth_std = np.std(versicolor_pwidths)
-virginica_pwidth_mean = np.mean(virginica_pwidths)
-virginica_pwidth_std = np.std(virginica_pwidths)
+    return numerator/denumerator
 
-print("PETAL WIDTHS: ")
-print("Mean setosa: ", setosa_pwidth_mean)
-print("Std setosa: ", setosa_pwidth_std)
-print("Mean versicolor: ", versicolor_pwidth_mean)
-print("Std versicolor: ", versicolor_pwidth_std)
-print("Mean virginca: ", virginica_pwidth_mean)
-print("Std viriginica: ", virginica_pwidth_std)
+print(f"\n----- The fisher scores for each feature: -----")
+print(f"Sepal length: {fisher_score(sepal_length)}")
+print(f"Sepal width: {fisher_score(sepal_width)}")
+print(f"Petal length: {fisher_score(petal_length)}")
+print(f"Petal width: {fisher_score(petal_width)}\n")
+print(f"The fisher score of the feature petal width is lowest at {fisher_score(petal_width)} which means it is the feature with the most overlap.")
 
-# according to the normal distribution: 99.7% of all data lies within 3std
-# therefore computing the areas between [mean - 3*std, mean + 3*std] for both petal length and width
-setosa_plength_area = [setosa_plength_mean - 3*setosa_plength_std, setosa_plength_mean + 3*setosa_plength_std]
-versicolor_plength_area = [versicolor_plength_mean - 3*versicolor_plength_std, versicolor_plength_mean + 3*versicolor_plength_std]
-virginica_plength_area = [virginica_plength_mean - 3*virginica_plength_std, virginica_plength_mean + 3*virginica_plength_std]
-
-print("Setosa plength area: ", setosa_plength_area)
-print("Versicolor plength area: ", versicolor_plength_area)
-print("Virginica plength area: ", virginica_plength_area)
-
-setosa_pwidth_area = [setosa_pwidth_mean - 3*setosa_pwidth_std, setosa_pwidth_mean + 3*setosa_pwidth_std]
-versicolor_pwidth_area = [versicolor_pwidth_mean - 3*versicolor_pwidth_std, versicolor_pwidth_mean + 3*versicolor_pwidth_std]
-virginica_pwidth_area = [virginica_pwidth_mean - 3*virginica_pwidth_std, virginica_pwidth_mean + 3*virginica_pwidth_std]
-
-print("Setosa pwidth area: ", setosa_pwidth_area)
-print("Versicolor pwidth area: ", versicolor_pwidth_area)
-print("Virginica pwidth area: ", virginica_pwidth_area)
