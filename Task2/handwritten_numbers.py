@@ -343,7 +343,7 @@ def confusion_matrix_64_template(all_templates, template_labels, y_test):
     from sklearn.metrics import confusion_matrix
     y_pred = []
     for img in x_test:
-        pred_label = KNN_label(img, all_templates, template_labels)
+        pred_label = NN_label(img, all_templates, template_labels)
         y_pred.append(pred_label)
     y_pred = np.array(y_pred)
 
@@ -432,7 +432,7 @@ def task2c():
 # --------------- Run tasks ------------------
 # For it to be easier to observe each task, only remove '#' for one task at a time
 
-task1a() # Task 1a
-task1bc() # Task 1b and 1c
-task2ab() # Task 2a and 2b
-task2c() # Task 2c
+# task1a() # Task 1a
+# task1bc() # Task 1b and 1c
+# task2ab() # Task 2a and 2b
+# task2c() # Task 2c
