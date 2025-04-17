@@ -117,7 +117,6 @@ n_test = len(x_test) #10_000
 # Test set: x_test, y_test
 
 
-
 # NN-based classifier using Euclidean distance
 
 def euclidean_distance(x, ref): # x = one example (784 features), ref = mu for 784 features
@@ -126,7 +125,7 @@ def euclidean_distance(x, ref): # x = one example (784 features), ref = mu for 7
     diff = x - mu
     return np.dot(diff.T, diff)
 
-def feature_vectors(n_test, train_images, train_labels):
+def feature_vectors(n_train, train_images, train_labels):
     feature_vec0 = []
     feature_vec1 = []
     feature_vec2 = []
@@ -137,7 +136,7 @@ def feature_vectors(n_test, train_images, train_labels):
     feature_vec7 = []
     feature_vec8 = []
     feature_vec9 = []
-    for i in range(n_test):
+    for i in range(n_train):
         if train_labels[i] == 0:
             feature0 = np.array(train_images[i]).flatten() # list of len 784
             feature_vec0.append(feature0)
@@ -199,11 +198,11 @@ def compute_ref1(feature_vec):
     return mu
 
 def nearest_neighbour(x, mu):
-    min_diff = 10**20
+    min_dist = 10**20
     for i in range(len(mu)):
-        diff = euclidean_distance(x,mu[i])
-        if min_diff > diff:
-            min_diff = diff
+        dist = euclidean_distance(x,mu[i])
+        if min_dist > dist:
+            min_dist = dist
             best_class = i
     return best_class
 
@@ -252,7 +251,7 @@ def plot_confusion_matrix(conf_mat, class_labels=None, title="Confusion Matrix")
 
 def task1a():
     print("----------------- Task 1a ---------------------")
-    feature_vector = feature_vectors(n_test, x_train, y_train)
+    feature_vector = feature_vectors(n_train, x_train, y_train)
     mu = compute_ref1(feature_vector)
 
     start = time.time()
@@ -355,7 +354,7 @@ def task2ab():
     start = time.time()
     confusion_matrix = confusion_matrix_64_template(all_templates, template_labels, y_test)
     end = time.time()
-    plot_confusion_matrix(confusion_matrix)
+    plot_confusion_matrix(confusion_matrix, class_labels=[0,1,2,3,4,5,6,7,8,9])
     find_error_rate(confusion_matrix)
     print(f"Time: {end-start}")
     return
@@ -423,7 +422,7 @@ def task2c():
     start = time.time()
     confusion_matrix = confusion_matrix_7NN(all_templates, template_labels, y_test)
     end = time.time()
-    plot_confusion_matrix(confusion_matrix)
+    plot_confusion_matrix(confusion_matrix, class_labels=[0,1,2,3,4,5,6,7,8,9])
     find_error_rate(confusion_matrix)
     print(f"Time: {end-start}")
 
@@ -432,7 +431,7 @@ def task2c():
 # --------------- Run tasks ------------------
 # For it to be easier to observe each task, only remove '#' for one task at a time
 
-# task1a() # Task 1a
+task1a() # Task 1a
 # task1bc() # Task 1b and 1c
 # task2ab() # Task 2a and 2b
 # task2c() # Task 2c
