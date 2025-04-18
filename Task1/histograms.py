@@ -7,7 +7,6 @@ import scipy.special as ss
 
 iris = load_iris() # sepal length, sepal width, petal length, petal width
 data = iris['data']
-labels = iris['target']
 
 num_classes = 3
 num_features = 4
@@ -15,7 +14,7 @@ N_train = 30
 
 setosa  = data[:50] # class 1 [1,0,0]
 versicolor = data[50:100] # class 2 [0,1,0]
-virginica = data[100:150] # class 3 [0,0,1]
+virginica = data[100:] # class 3 [0,0,1]
 
 #print("Setosa train: \n", setosa_train)
 #print("Versicolor train: \n", versicolor_train)
@@ -168,7 +167,7 @@ for iteration in range(iterations):
     w_io -= alpha * w_ioGradMSE(g)
 
 
-## CONFUTION MATRIX ##
+## CONFUSION MATRIX ##
 
 # initalization
 confusion_matrix_train = np.zeros((num_classes, num_classes), dtype=int)
@@ -252,7 +251,7 @@ for iteration in range(iterations):
     w_io -= alpha * w_ioGradMSE(g)
 
 
-## CONFUTION MATRIX ##
+## CONFUSION MATRIX ##
 
 # initalization
 confusion_matrix_train = np.zeros((num_classes, num_classes), dtype=int)
@@ -337,7 +336,7 @@ for iteration in range(iterations):
     w_io -= alpha * w_ioGradMSE(g)
 
 
-## CONFUTION MATRIX ##
+## CONFUSION MATRIX ##
 
 # initalization
 confusion_matrix_train = np.zeros((num_classes, num_classes), dtype=int)

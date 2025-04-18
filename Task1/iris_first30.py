@@ -6,7 +6,6 @@ from sklearn.datasets import load_iris
 
 iris = load_iris() # sepal length, sepal width, petal length, petal width
 data = iris['data']
-label = iris['target']
 
 num_classes = 3
 num_features = 4
@@ -47,43 +46,38 @@ def xavier_init(fan_in, fan_out):
     limit = np.sqrt(1 / fan_in)  # Xavier-uniform range
     return np.random.uniform(-limit, limit, (fan_in, fan_out))
 
-def WgradMSE(g):
-    # divide by m to avoid unstable learning
+def WgradMSE(z):
     m = X_train.shape[0]
-    dg = sigmoid(g) - t_train
-    return np.dot(dg.T, X_train) / m
+    g = sigmoid(z) - t_train
+    return np.dot(g.T, X_train) / m # divide by m to avoid unstable learning
 
-def w_ioGradMSE(g):
-    # divide by m to avoid unstable learning
+def w_oGradMSE(z):
     m = X_train.shape[0]
-    dg = sigmoid(g) - t_train
-    return np.sum(dg, axis=0, keepdims=True) / m
+    g = sigmoid(z) - t_train
+    return np.sum(g, axis=0, keepdims=True) / m # divide by m to avoid unstable learning
 
 
 ## INITIALIZATION ##
 
 # W = C x D
 W = xavier_init(num_classes, num_features)
-print("W init: ", W)
-w_io = np.zeros((1, num_classes))  # Init bias
+w_o = np.zeros((1, num_classes))  # Init bias
 
 # Gradient descent
-alpha = 0.01
-iterations = 10000
+alpha = 0.1
+iterations = 100_000
 
 ## TRAINING ##
+print("W init: ", W)
 for iteration in range(iterations):
-    g = np.dot(X_train, W.T) + w_io
-    g_k = sigmoid(g)
-
-    W -= alpha * WgradMSE(g)
-    w_io -= alpha * w_ioGradMSE(g)
-
+    z = np.dot(X_train, W.T) + w_o
+    W -= alpha * WgradMSE(z)
+    w_o -= alpha * w_oGradMSE(z)
 print("W trained: ", W)
 
 #----------------------------------------------------------
 
-## CONFUTION MATRIX ##
+## CONFUSION MATRIX ##
 
 # initalization
 confusion_matrix_train = np.zeros((num_classes, num_classes), dtype=int)
@@ -91,16 +85,18 @@ confusion_matrix_test = np.zeros((num_classes, num_classes), dtype=int)
 
 # adding to confusion matrixes
 for i in range(len(X_train)):
-    g = sigmoid(np.dot(X_train[i], W.T) + w_io)
+    z = np.dot(X_train[i], W.T) + w_o
+    g = sigmoid(z)
+    print("g: ", g)
 
-    true_train_class = np.argmax(t_train[i])
-    #print("True train class: ", true_train_class)
     predicted_class = np.argmax(g)
+    true_train_class = np.argmax(t_train[i])
 
     confusion_matrix_train[true_train_class][predicted_class] += 1
 
 for i in range(len(X_test)):
-    g = sigmoid(np.dot(X_test[i], W.T) + w_io)
+    z = np.dot(X_test[i], W.T) + w_o
+    g = sigmoid(z)
     
     predicted_class = np.argmax(g)
     true_test_class = i//20
