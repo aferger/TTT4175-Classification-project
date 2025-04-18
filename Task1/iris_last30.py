@@ -21,7 +21,6 @@ setosa_train = setosa[N_train:]
 versicolor_train = versicolor[N_train:]
 virginica_train = virginica[N_train:]
 X_train = np.vstack([setosa_train, versicolor_train, virginica_train])
-print("len of training set: ", len(X_train))
 
 # Test sets
 setosa_test = setosa[:N_train]

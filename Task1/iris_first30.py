@@ -87,7 +87,6 @@ confusion_matrix_test = np.zeros((num_classes, num_classes), dtype=int)
 for i in range(len(X_train)):
     z = np.dot(X_train[i], W.T) + w_o
     g = sigmoid(z)
-    print("g: ", g)
 
     predicted_class = np.argmax(g)
     true_train_class = np.argmax(t_train[i])
