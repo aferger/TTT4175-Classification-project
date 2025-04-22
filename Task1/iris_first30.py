@@ -57,7 +57,7 @@ def w_oGradMSE(z):
     return np.sum(g, axis=0, keepdims=True) / m # divide by m to avoid unstable learning
 
 
-## INITIALIZATION ##
+## INITIALIZATION AND TRAINING ##
 
 # W = C x D
 W = xavier_init(num_classes, num_features)
@@ -67,7 +67,6 @@ w_o = np.zeros((1, num_classes))  # Init bias
 alpha = 0.1
 iterations = 100_000
 
-## TRAINING ##
 print("W init: ", W)
 for iteration in range(iterations):
     z = np.dot(X_train, W.T) + w_o
