@@ -16,86 +16,6 @@ setosa  = data[:50] # class 1 [1,0,0]
 versicolor = data[50:100] # class 2 [0,1,0]
 virginica = data[100:] # class 3 [0,0,1]
 
-setosa_plengths = []
-setosa_pwidths = []
-setosa_slengths = []
-setosa_swidths = []
-versicolor_plengths = []
-versicolor_pwidths = []
-versicolor_slengths = []
-versicolor_swidths = []
-virginica_plengths = []
-virginica_pwidths = []
-virginica_slengths = []
-virginica_swidths = []
-for i in range(0, len(setosa[:N_train])):
-    setosa_plengths.append(setosa[i][0])
-    setosa_pwidths.append(setosa[i][1])
-    setosa_slengths.append(setosa[i][2])
-    setosa_swidths.append(setosa[i][3])
-for i in range(0, len(versicolor[:N_train])):
-    versicolor_plengths.append(versicolor[i][0])
-    versicolor_pwidths.append(versicolor[i][1])
-    versicolor_slengths.append(versicolor[i][2])
-    versicolor_swidths.append(versicolor[i][3])
-for i in range(0, len(virginica[:N_train])):
-    virginica_plengths.append(virginica[i][0])
-    virginica_pwidths.append(virginica[i][1])
-    virginica_slengths.append(virginica[i][2])
-    virginica_swidths.append(virginica[i][3])
-
-# Plotting                                              SKAL DETTE KUN VÆRE TRAINING SET?
-fig, ax = plt.subplots(2, 2)
-ax[0][0].hist(setosa_slengths, bins=10, color='r', alpha=0.5, label='Setosa sepal length')
-ax[0][1].hist(setosa_swidths, bins=10, color='r', alpha=0.5, label='Setosa sepal width')
-ax[1][0].hist(setosa_plengths, bins=10, color='r', alpha=0.5, label='Setosa petal length')
-ax[1][1].hist(setosa_pwidths, bins=10, color='r', alpha=0.5, label='Setosa petal width')
-
-ax[0][0].hist(versicolor_slengths, bins=10, color='g', alpha=0.5, label='Versicolor sepal length')
-ax[0][1].hist(versicolor_swidths, bins=10, color='g', alpha=0.5, label='Versicolor sepal width')
-ax[1][0].hist(versicolor_plengths, bins=10, color='g', alpha=0.5, label='Versicolor petal length')
-ax[1][1].hist(versicolor_pwidths, bins=10, color='g', alpha=0.5, label='Versicolor petal width')
-
-ax[0][0].hist(virginica_slengths, bins=10, color='b', alpha=0.5, label='Virginica sepal length')
-ax[0][1].hist(virginica_swidths, bins=10, color='b', alpha=0.5, label='Virginica sepal width')
-ax[1][0].hist(virginica_plengths, bins=10, color='b', alpha=0.5, label='Virginica petal length')
-ax[1][1].hist(virginica_pwidths, bins=10, color='b', alpha=0.5, label='Virginica petal width')
-
-ax[0][0].legend()
-ax[0][1].legend()
-ax[1][0].legend()
-ax[1][1].legend()
-
-plt.show()
-
-
-#-------------------------------------------------------------------
-
-
-# Finding the feature with the most overlap
-# The feature with the most overlap is the one with the lowest Fisher score
-# The Fisher Score
-petal_length = [setosa_plengths,versicolor_plengths, virginica_plengths]
-petal_width = [setosa_pwidths, versicolor_pwidths, virginica_pwidths]
-sepal_length = [setosa_slengths, versicolor_slengths, virginica_slengths]
-sepal_width = [setosa_swidths, versicolor_swidths, virginica_swidths]
-
-def fisher_score(feature):
-    n_c = 30
-    numerator = 0
-    denumerator = 0
-    for c in feature:
-        numerator += n_c * (np.mean(c)-np.mean(feature))**2
-        denumerator += n_c * np.std(c)**2
-
-    return numerator/denumerator
-
-print(f"\n----- The fisher scores for each feature: -----")
-print(f"Sepal length: {fisher_score(sepal_length)}")
-print(f"Sepal width: {fisher_score(sepal_width)}")
-print(f"Petal length: {fisher_score(petal_length)}")
-print(f"Petal width: {fisher_score(petal_width)}\n")
-
 
 #-----------------------------------------------------------------------
 
@@ -127,13 +47,16 @@ def w_oGradMSE(z):
 alpha = 0.01
 iterations = 10000
 
-#------------------------------------------------------------------
-
-X = np.vstack([setosa, versicolor, virginica])
+#-------------------------------------------------------------------
 
 # Removing the feature with the most overlap
-for i in range(num_features-1):
-    X = np.delete(X, -1, axis=1) # remove one and one feature from the data set
+for i in range(4):
+    num_features = 4
+    X = np.vstack([setosa, versicolor, virginica])
+    print("X: ", X[:8])
+    
+    X = np.delete(X, i, axis=1) # remove one and one feature from the data set
+    print("X without feature", i, ": ", X[:8])
     X_train = np.vstack([X[:N_train], X[50:50+N_train], X[100:100+N_train]])
     X_test = np.vstack([X[N_train:50], X[50+N_train:100], X[100+N_train:]])
     t_train = np.vstack([np.tile([1,0,0], (N_train, 1)), np.tile([0,1,0], (N_train, 1)), np.tile([0,0,1], (N_train, 1))])

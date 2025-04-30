@@ -48,12 +48,14 @@ def xavier_init(fan_in, fan_out):
 
 def WgradMSE(z):
     m = X_train.shape[0]
-    g = sigmoid(z) - t_train
+    g = [(sigmoid(z) - t_train) * sigmoid(z) * (1 - sigmoid(z))]
+    g = np.array(g).reshape(m, num_classes)
     return np.dot(g.T, X_train) / m # divide by m to avoid unstable learning
 
 def w_oGradMSE(z):
     m = X_train.shape[0]
-    g = sigmoid(z) - t_train
+    g = [(sigmoid(z) - t_train) * sigmoid(z) * (1 - sigmoid(z))]
+    g = np.array(g).reshape(m, num_classes)
     return np.sum(g, axis=0, keepdims=True) / m # divide by m to avoid unstable learning
 
 
@@ -115,10 +117,10 @@ total_classified_train = confusion_matrix_train.sum(axis=1)
 wrongly_classified_test = confusion_matrix_test.sum(axis=1) - np.diag(confusion_matrix_test)
 total_classified_test = confusion_matrix_test.sum(axis=1)
 
-ERR_T = wrongly_classified_train.sum() / total_classified_train.sum()
-ERR_setosa = wrongly_classified_train[0] / total_classified_train[0]
-ERR_versicolor = wrongly_classified_train[1] / total_classified_train[1]
-ERR_virginica = wrongly_classified_train[2] / total_classified_train[2]
+ERR_T = wrongly_classified_train.sum() / total_classified_train.sum() * 100
+ERR_setosa = wrongly_classified_train[0] / total_classified_train[0] * 100
+ERR_versicolor = wrongly_classified_train[1] / total_classified_train[1] * 100
+ERR_virginica = wrongly_classified_train[2] / total_classified_train[2] * 100
 
 print("ERROR RATE TRAIN SET: ")
 print("Total error rate: ", ERR_T)
@@ -126,10 +128,10 @@ print("Error rate setosa: ", ERR_setosa)
 print("Error rate versicolor: ", ERR_versicolor)
 print("Error rate virginica: ", ERR_virginica)
 
-ERR_T = wrongly_classified_test.sum() / total_classified_test.sum()
-ERR_setosa = wrongly_classified_test[0] / total_classified_test[0]
-ERR_versicolor = wrongly_classified_test[1] / total_classified_test[1]
-ERR_virginica = wrongly_classified_test[2] / total_classified_test[2]
+ERR_T = wrongly_classified_test.sum() / total_classified_test.sum() * 100
+ERR_setosa = wrongly_classified_test[0] / total_classified_test[0] * 100
+ERR_versicolor = wrongly_classified_test[1] / total_classified_test[1] * 100
+ERR_virginica = wrongly_classified_test[2] / total_classified_test[2] * 100
 
 print("-----")
 print("ERROR RATE TEST SET: ")
