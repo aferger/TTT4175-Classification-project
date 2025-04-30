@@ -1,4 +1,6 @@
-#
+# To run tasks, see end of file.
+
+## Loading data written by Hojjat Khodabakhsh at https://www.kaggle.com/code/hojjatk/read-mnist-dataset
 # This is a sample Notebook to demonstrate how to read "MNIST Dataset"
 #
 import numpy as np # linear algebra
@@ -85,26 +87,7 @@ def show_images(images, title_texts):
 #
 mnist_dataloader = MnistDataloader(training_images_filepath, training_labels_filepath, test_images_filepath, test_labels_filepath)
 (x_train, y_train), (x_test, y_test) = mnist_dataloader.load_data()
-
-#
-# Show some random training and test images 
-#
-images_2_show = []
-titles_2_show = []
-for i in range(0, 10):
-    r = random.randint(1, 60000)
-    images_2_show.append(x_train[r])
-    titles_2_show.append('training image [' + str(r) + '] = ' + str(y_train[r]))    
-
-for i in range(0, 5):
-    r = random.randint(1, 10000)
-    images_2_show.append(x_test[r])        
-    titles_2_show.append('test image [' + str(r) + '] = ' + str(y_test[r]))    
-
-
-
-
-
+## END loading of dataset ----------
 
 
 
@@ -116,117 +99,53 @@ n_test = len(x_test) #10_000
 # Training set: x_train (images), y_train (labels)
 # Test set: x_test, y_test
 
+def classsorted_train(x_train, y_train):
+    n_train = len(y_train)
+    classsorted_train_img = [[],[],[],[],[],[],[],[],[],[]]
+    for i in range(0,n_train):
+        label = y_train[i]
+        train_img = np.array(x_train[i]).flatten()
+        classsorted_train_img[label].append(train_img)
+    return classsorted_train_img
+
 
 # NN-based classifier using Euclidean distance
 
-def euclidean_distance(x, ref): # x = one example (784 features), ref = mu for 784 features
-    x = np.array(x).flatten()
-    mu = ref
-    diff = x - mu
-    return np.dot(diff.T, diff)
+def nearest_neighbor(img, x_template, y_template):   
+    distances = np.linalg.norm(x_template - img, axis=1) # Euclidean distance
+    min_dist_idx = np.argmin(distances) # index of smallest distance
+    return y_template[min_dist_idx] # Class of smallest distance
 
-def feature_vectors(n_train, train_images, train_labels):
-    feature_vec0 = []
-    feature_vec1 = []
-    feature_vec2 = []
-    feature_vec3 = []
-    feature_vec4 = []
-    feature_vec5 = []
-    feature_vec6 = []
-    feature_vec7 = []
-    feature_vec8 = []
-    feature_vec9 = []
-    for i in range(n_train):
-        if train_labels[i] == 0:
-            feature0 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec0.append(feature0)
-
-        elif train_labels[i] == 1:
-            feature1 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec1.append(feature1)
-
-        elif train_labels[i] == 2:
-            feature2 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec2.append(feature2)
-
-        elif train_labels[i] == 3:
-            feature3 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec3.append(feature3)
-
-        elif train_labels[i] == 4:
-            feature4 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec4.append(feature4)
-
-        elif train_labels[i] == 5:
-            feature5 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec5.append(feature5)
-
-        elif train_labels[i] == 6:
-            feature6 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec6.append(feature6)
-
-        elif train_labels[i] == 7:
-            feature7 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec7.append(feature7)
-
-        elif train_labels[i] == 8:
-            feature8 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec8.append(feature8)
-
-        elif train_labels[i] == 9:
-            feature9 = np.array(train_images[i]).flatten() # list of len 784
-            feature_vec9.append(feature9)
-    
-    feature_vec0 = np.array(feature_vec0)
-    feature_vec1 = np.array(feature_vec1)
-    feature_vec2 = np.array(feature_vec2)
-    feature_vec3 = np.array(feature_vec3)
-    feature_vec4 = np.array(feature_vec4)
-    feature_vec5 = np.array(feature_vec5)
-    feature_vec6 = np.array(feature_vec6)
-    feature_vec7 = np.array(feature_vec7)
-    feature_vec8 = np.array(feature_vec8)
-    feature_vec9 = np.array(feature_vec9)
-
-    return [feature_vec0, feature_vec1, feature_vec2, feature_vec3, feature_vec4, feature_vec5, feature_vec6, feature_vec7, feature_vec8, feature_vec9]
-
-
-def compute_ref1(feature_vec):
-    mu = []
-    for i in range(len(feature_vec)):
-        mu.append(np.sum(feature_vec[i], axis=0)/len(feature_vec[i]))
-    return mu
-
-def nearest_neighbour(x, mu):
-    min_dist = 10**20
-    for i in range(len(mu)):
-        dist = euclidean_distance(x,mu[i])
-        if min_dist > dist:
-            min_dist = dist
-            best_class = i
-    return best_class
-
-# Confusion matrix
-def find_confusion_matrix(n_classes, x_test, y_test, mu):
-
+def confusion_matrix_NN(n_classes, x_test_flat, y_test, x_template, y_template, x_test):
     confusion_matrix = np.zeros((n_classes, n_classes), dtype=int)
-
     misclassified_images = []
+    misclassified_images_predicted_label = []
     correct_classified_images = []
-
-    for i, test_image in enumerate(x_test):
-        true_class = y_test[i]  # The correct class
-        predicted_class = nearest_neighbour(np.array(test_image).flatten(), mu)  # Classify test image
-
-        confusion_matrix[true_class][predicted_class] += 1  # Update confusion matrix
+    for i, test_image in enumerate(x_test_flat):
+        true_class = y_test[i] # True class 
+        predicted_class = nearest_neighbor(test_image, x_template, y_template) # Predicted class (NN)
+        confusion_matrix[true_class][predicted_class] += 1 # Update confusion matrix
 
         if true_class == predicted_class:
-            correct_classified_images.append(test_image)
+            correct_classified_images.append(x_test[i]) # Add correctly classified image
         else:
-            misclassified_images.append(test_image)
-    
-    return confusion_matrix, misclassified_images, correct_classified_images
+            misclassified_images.append(x_test[i]) # Add misclassified image
+            misclassified_images_predicted_label.append(predicted_class) # Add its predicted class
+        
+    return confusion_matrix, misclassified_images, correct_classified_images, misclassified_images_predicted_label
 
+
+def confusion_matrix_prosent(confusion_matrix, x_test, y_test):
+    sorted_test = classsorted_train(x_test, y_test)
+    confusion_matrix_rate = []
+    for i, row in enumerate(confusion_matrix):
+        row_prosent = []
+        num_examples = len(sorted_test[i])
+        for j in range(0,len(row)):
+            row_prosent.append(row[j]/num_examples *100)
+        confusion_matrix_rate.append(np.array(row_prosent))
+
+    return np.array(confusion_matrix_rate)
 
 # Error rate
 def find_error_rate(confusion_matrix):
@@ -241,7 +160,7 @@ def find_error_rate(confusion_matrix):
 
 def plot_confusion_matrix(conf_mat, class_labels=None, title="Confusion Matrix"):
     plt.figure(figsize=(10, 8))
-    sns.heatmap(conf_mat, annot=True, fmt='d', cmap='Blues', 
+    sns.heatmap(conf_mat, annot=True, fmt='.2f', cmap='Blues', 
                 xticklabels=class_labels, yticklabels=class_labels)
     plt.xlabel('Predicted')
     plt.ylabel('True')
@@ -249,68 +168,62 @@ def plot_confusion_matrix(conf_mat, class_labels=None, title="Confusion Matrix")
     plt.show()
 
 
-def task1a():
-    print("----------------- Task 1a ---------------------")
-    feature_vector = feature_vectors(n_train, x_train, y_train)
-    mu = compute_ref1(feature_vector)
+# Plot of some misclassified numbers --------------------------------------------------------
+
+def plot_classified_images(classified_images, title, true_label=0):
+    plt.title(title)
+    plt.axis('off')  # Hide the axis labels
+
+    # Add the first image to the figure (top-left position)
+    plt.subplot(2, 2, 1)
+    plt.imshow(classified_images[0])  
+
+    # Add the second image to the figure (top-right position)
+    plt.subplot(2, 2, 2)
+    plt.imshow(classified_images[1])  
+
+    # Add the third image to the figure (bottom-left position)
+    plt.subplot(2, 2, 3)  
+    plt.imshow(classified_images[2]) 
+
+    # Add the fourth image to the figure (bottom-right position)
+    plt.subplot(2, 2, 4)
+    plt.imshow(classified_images[3])  
+
+    if true_label != 0:
+        print("Predicted classes of misclassified images: ")
+        print(f"Top left: {true_label[0]}")
+        print(f"Top right: {true_label[1]}")
+        print(f"Bottom left: {true_label[2]}")
+        print(f"Bottom right: {true_label[3]}")
+
+    plt.show()
+
+# -------------------------------------------------------------------------------
+
+def task1():
+    print("----------------- NN classifier using whole training set ---------------------")
+    labels = [0,1,2,3,4,5,6,7,8,9]
+    x_train_flat = np.array([np.array(img, dtype=np.float32).flatten() / 255.0 for img in x_train]) # Normalize training set
+    x_test_flat = np.array([np.array(img, dtype=np.float32).flatten() / 255.0 for img in x_test]) # Normalize test set
 
     start = time.time()
-    confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix(n_classes, x_test, y_test, mu)
+    confusion_matrix, misclassified_images, correct_classified_images, true_label = confusion_matrix_NN(n_classes, x_test_flat, y_test, x_train_flat, y_train, x_test)
     end = time.time()
 
-    plot_confusion_matrix(confusion_matrix, class_labels=[0,1,2,3,4,5,6,7,8,9])
+    print(confusion_matrix)
+    plot_classified_images(misclassified_images, "Misclassified images", true_label)
+    plot_classified_images(correct_classified_images, "Correctly classified images")
+    confusion_matrix_rate = confusion_matrix_prosent(confusion_matrix, x_test, y_test)
+    plot_confusion_matrix(confusion_matrix_rate, class_labels=labels)
     find_error_rate(confusion_matrix)
 
     print(f"Time: {end-start} seconds")
 
 
-# Plot of some misclassified numbers --------------------------------------------------------
-
-def plot_classified_images(classified_images, title):
-    plt.title(title)
-    plt.axis('off')  # Hide the axis labels
-
-    # Add the first image to the figure (top-left position)
-    plt.subplot(2, 2, 1)  # 2 rows, 2 columns, first position
-    plt.imshow(classified_images[0])  
-
-    # Add the second image to the figure (top-right position)
-    plt.subplot(2, 2, 2)  # 2 rows, 2 columns, second position
-    plt.imshow(classified_images[1])  
-
-    # Add the third image to the figure (bottom-left position)
-    plt.subplot(2, 2, 3)  # 2 rows, 2 columns, third position
-    plt.imshow(classified_images[2]) 
-
-    # Add the fourth image to the figure (bottom-right position)
-    plt.subplot(2, 2, 4)  # 2 rows, 2 columns, fourth position
-    plt.imshow(classified_images[3])  
-
-    plt.show()
-
-def task1bc():
-    print("---------------- Task 1b and 1c --------------------")
-    feature_vector = feature_vectors(n_test, x_train, y_train)
-    mu = compute_ref1(feature_vector)
-    confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix(n_classes, x_test, y_test, mu)
-    plot_classified_images(misclassified_images, "Misclassified images")
-    plot_classified_images(correct_classified_images, "Correctly classified images")
-
-
-# -------------------------------------------------------------------------------
-
-
-
-
-
 
 # 2. Clustering 
 from sklearn.cluster import KMeans
-
-M = 64  #number of clusters
-n_train = 6000
-train_v = feature_vectors(n_test, x_train, y_train)
-
 
 def class_template_clusters(n_clusters, train_v):
     C = []
@@ -321,117 +234,172 @@ def class_template_clusters(n_clusters, train_v):
         C.append(Ci)
     return C
 
-C = class_template_clusters(M,train_v) #Len 10 x 64
-all_templates = np.vstack(C)  # Shape: (640, 784)
-template_labels = np.array([i for i in range(10) for _ in range(64)])  # Shape: (640,)
+def clustered_template(M, x_train, y_train):
+    train_v = classsorted_train(x_train, y_train)
+    C = class_template_clusters(M,train_v) #Len 10 x 64
+    x_templates = np.vstack(C)  # Shape: (640, 784)
+    y_templates = np.array([i for i in range(n_classes) for _ in range(M)])  # Shape: (640,)
+    return x_templates, y_templates
 
+def confusion_matrix_NN_cluster(n_classes, x_test, y_test, x_template, y_template):
+    confusion_matrix = np.zeros((n_classes, n_classes), dtype=int)
+    misclassified_images = []
+    correct_classified_images = []
+    misclassified_images_predicted_label = []
+    for i, test_image in enumerate(x_test):
+        true_class = y_test[i]  # The correct class
+        predicted_class = nearest_neighbor(np.array(test_image).flatten(), x_template, y_template) # Classify test image
+        confusion_matrix[true_class][predicted_class] += 1  # Update confusion matrix
 
-# Confusion matrix
-
-def NN_label(image, templates, template_labels):
-    image_flat = np.array(image).flatten()
-
-    #Euclidean distance:
-    distances = np.linalg.norm(templates-image_flat, axis=1)
+        if true_class == predicted_class:
+            correct_classified_images.append(test_image)
+        else:
+            misclassified_images.append(test_image)
+            misclassified_images_predicted_label.append(predicted_class)
     
-    nearest_idx = np.argmin(distances)
-    return template_labels[nearest_idx]
+    return confusion_matrix, misclassified_images, correct_classified_images, misclassified_images_predicted_label
 
+def task2b():
+    print("----------------- NN classifier using clustering ---------------------")
+    M = 64
+    x_templates, y_templates = clustered_template(M, x_train, y_train)
 
-def confusion_matrix_64_template(all_templates, template_labels, y_test):
-    from sklearn.metrics import confusion_matrix
-    y_pred = []
-    for img in x_test:
-        pred_label = NN_label(img, all_templates, template_labels)
-        y_pred.append(pred_label)
-    y_pred = np.array(y_pred)
-
-    confusion_matrix = confusion_matrix(y_test, y_pred)
-    return confusion_matrix
-
-def task2ab():
-    print("------------------ Task 2a and 2b -------------------")
     start = time.time()
-    confusion_matrix = confusion_matrix_64_template(all_templates, template_labels, y_test)
+    confusion_matrix, misclassified_images, correct_classified_images, pred_labels = confusion_matrix_NN_cluster(n_classes, x_test, y_test, x_templates, y_templates)
     end = time.time()
-    plot_confusion_matrix(confusion_matrix, class_labels=[0,1,2,3,4,5,6,7,8,9])
+
+    print(confusion_matrix)
+    confusion_matrix_rate = confusion_matrix_prosent(confusion_matrix, x_test, y_test)
+    plot_classified_images(misclassified_images, "Misclassified images", pred_labels)
+    plot_classified_images(correct_classified_images, "Correctly classified images")
+    plot_confusion_matrix(confusion_matrix_rate, class_labels=[0,1,2,3,4,5,6,7,8,9])
     find_error_rate(confusion_matrix)
-    print(f"Time: {end-start}")
-    return
+    print(f"Time: {end-start}")   
 
 
+def K_nearest_neighbor(img, x_template, y_template, K):    
+    distances = np.linalg.norm(x_template - img, axis=1)
 
-
-# KNN classifier with K = 7
-
-def KNN_labels(image, templates, template_labels, K=1):
-    image_flat = np.array(image).flatten()
-
-    #Euclidean distance:
-    distances = np.linalg.norm(templates-image_flat, axis=1)
-    
-    # Finding K closest distances:
+    # Nearest K neighbors:
     label_dist = []
-    for i in range(0, K):
+    for i in range(0,K):
         idx = np.argmin(distances)
-        label_dist.append([template_labels[idx], distances[idx]])
+        label_dist.append([y_template[idx], distances[idx]])
         distances = np.delete(distances, idx)
     
-    return label_dist
-
-
-def confusion_matrix_7NN(all_templates, template_labels, y_test):
-    from sklearn.metrics import confusion_matrix
-    y_pred = []
-    for img in x_test:
-        label_dist = KNN_labels(img, all_templates, template_labels,7)
-        
-        # Checking the number of each labels
-        pred_labels = [row[0] for row in label_dist]
-        dists = [row[1] for row in label_dist]
-        num_labels = {}
-        for label in pred_labels:
-            if label in num_labels.keys():
-               num_labels[label] += 1
-            else:
-               num_labels[label] = 1
-
-        highest_num = 0
-        min_dist = 10**20
-        idx = 0
-        for label, num in num_labels.items():
-            if num > highest_num:
-                highest_num = num
-                pred_label = label
-                min_dist = dists[idx]
-            elif num == highest_num:
-                dist = dists[idx]
-                if dist < min_dist:
-                    pred_label = label
-            idx += 1
-
-        y_pred.append(pred_label)
-    y_pred = np.array(y_pred)
-
-    confusion_matrix = confusion_matrix(y_test, y_pred)
-    return confusion_matrix
+    # Class with most votes and (if tied) class with the lowest sum of distances.
+    num_labels = {}
+    for i in range(0,len(label_dist)):
+        label = label_dist[i][0]
+        if label in num_labels.keys():
+            num_labels[label][0] += 1
+            num_labels[label][1] += label_dist[i][1]
+        else:
+            num_labels[label] = [1, label_dist[i][1]]
     
+    highest_num = 0
+    lowest_sum = 10**20
+    pred_label = 0
+    for label, num in num_labels.items():
+        if num[0] > highest_num:
+            highest_num = num[0]
+            pred_label = label
+            lowest_sum = num[1]
+        elif num[0] == highest_num and num[1] < lowest_sum:
+            pred_label = label
+            lowest_sum = num[1]
+
+    return pred_label
+
+
+def find_confusion_matrix_KNN(n_classes, x_test, y_test, x_template, y_template, K):
+    confusion_matrix = np.zeros((n_classes, n_classes), dtype=int)
+    misclassified_images = []
+    correct_classified_images = []
+    misclassified_images_predicted_labels = []
+    for i, test_image in enumerate(x_test):
+        true_class = y_test[i]  # The correct class
+        predicted_class = K_nearest_neighbor(np.array(test_image).flatten(), x_template, y_template, K) # Classify test image
+        confusion_matrix[true_class][predicted_class] += 1  # Update confusion matrix
+
+        if true_class == predicted_class:
+            correct_classified_images.append(test_image)
+        else:
+            misclassified_images.append(test_image)
+            misclassified_images_predicted_labels.append(predicted_class)
+    
+    return confusion_matrix, misclassified_images, correct_classified_images, misclassified_images_predicted_labels
+
 
 def task2c():
-    print("------------ Task 2c -------------")
+    print("----------------- KNN classifier using clustering ---------------------")
+    K = 7
+    M = 64
+    x_templates, y_templates = clustered_template(M, x_train, y_train)
+
     start = time.time()
-    confusion_matrix = confusion_matrix_7NN(all_templates, template_labels, y_test)
+    confusion_matrix, misclassified_images, correct_classified_images, pred_labels = find_confusion_matrix_KNN(n_classes, x_test, y_test, x_templates, y_templates, K)
     end = time.time()
-    plot_confusion_matrix(confusion_matrix, class_labels=[0,1,2,3,4,5,6,7,8,9])
+    print(confusion_matrix)
+    confusion_matrix_rate = confusion_matrix_prosent(confusion_matrix, x_test, y_test)
+    plot_classified_images(misclassified_images, "Misclassified images", pred_labels)
+    plot_classified_images(correct_classified_images, "Correctly classified images")
+    plot_confusion_matrix(confusion_matrix_rate, class_labels=[0,1,2,3,4,5,6,7,8,9])
     find_error_rate(confusion_matrix)
     print(f"Time: {end-start}")
 
+
+
+
+# -------------------- BEGIN PLOTTING ERROR RATES -----------------------
+
+def error_rate_of_clusters(M):
+    x_templates, y_templates = clustered_template(M, x_train, y_train)
+    confusion_matrix, misclassified_images, correct_classified_images, pred_labels = confusion_matrix_NN_cluster(n_classes, x_test, y_test, x_templates, y_templates)
+    error_rate = find_error_rate(confusion_matrix)
+    return error_rate
+
+def plot_error_rate_clusters(M_max):
+    errors =[]
+    Ms = np.arange(1,M_max+1,7)
+    for M in Ms:
+        errors.append(error_rate_of_clusters(M)*100)
+    plt.plot(Ms,errors, marker='o')
+    plt.xlabel('Number of clusters (M)')
+    plt.ylabel('Error rate (%)')
+    plt.title('Error Rate vs M in NN-classifier')
+    plt.show()
+
+M_max = 210
+#plot_error_rate_clusters(M_max)
+
+def error_rate_of_K(K):
+    M=64
+    x_templates, y_templates = clustered_template(M, x_train, y_train)
+    confusion_matrix, misclassified_images, correct_classified_images = find_confusion_matrix_KNN(n_classes, x_test, y_test, x_templates, y_templates, K)
+    error_rate = find_error_rate(confusion_matrix)
+    return error_rate
+
+
+def plot_error_rate_K(K_max):
+    errors = []
+    Ks = np.arange(1,K_max+1)
+    for K in Ks:
+        errors.append(error_rate_of_K(K)*100)
+    plt.plot(Ks,errors, marker='o')
+    plt.xlabel('K value')
+    plt.ylabel('Error rate (%)')
+    plt.title('Error Rate vs K in KNN-classifier')
+    plt.show()
+K_max = 15
+#plot_error_rate_K(K_max)
+
+# ------------------- END PLOTTING ERROR RATES --------------------------
 
 
 # --------------- Run tasks ------------------
 # For it to be easier to observe each task, only remove '#' for one task at a time
 
-task1a() # Task 1a
-# task1bc() # Task 1b and 1c
-# task2ab() # Task 2a and 2b
-# task2c() # Task 2c
+#task1() # Task 1
+#task2b() # Task 2b
+#task2c() # Task 2c
