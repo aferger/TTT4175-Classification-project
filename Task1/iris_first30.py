@@ -1,6 +1,10 @@
 import numpy as np
 from sklearn.datasets import load_iris
 
+#######################################
+###   IRIS DATASET CLASSIFICATION   ###
+# With the first 30 samples of each class
+
 
 ## VARIABLE DEFINITIONS ##
 

@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
 import scipy.special as ss
 
+#######################################
+###   IRIS DATASET CLASSIFICATION   ###
+# Histrograms and removal of features
+
 ## CREATING TRAINING SET AND HISTOGRAM PLOTS ##
 
 iris = load_iris() # sepal length, sepal width, petal length, petal width
@@ -44,7 +48,7 @@ for i in range(0, len(virginica[:N_train])):
     virginica_slengths.append(virginica[i][2])
     virginica_swidths.append(virginica[i][3])
 
-# Plotting                                              SKAL DETTE KUN VÆRE TRAINING SET?
+# Plotting 
 fig, ax = plt.subplots(2, 2)
 ax[0][0].hist(setosa_slengths, bins=10, color='r', alpha=0.5, label='Setosa sepal length')
 ax[0][1].hist(setosa_swidths, bins=10, color='r', alpha=0.5, label='Setosa sepal width')

@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
 import scipy.special as ss
 
-## CREATING TRAINING SET AND HISTOGRAM PLOTS ##
+#######################################
+###   IRIS DATASET CLASSIFICATION   ###
+# Removing one feature at a time
 
 iris = load_iris() # sepal length, sepal width, petal length, petal width
 data = iris['data']
